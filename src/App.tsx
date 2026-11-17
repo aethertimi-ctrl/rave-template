@@ -193,12 +193,6 @@ function App() {
     setSubmitMessage('');
     setSubmitError('');
 
-    // Honeypot tripped: pretend success so bots learn nothing.
-    if (trap) {
-      setSubmitMessage('You are on the list. We will send the next drop to your inbox.');
-      return;
-    }
-
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
 
