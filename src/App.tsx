@@ -20,6 +20,14 @@ import {
 } from 'lucide-react';
 import { submitRsvp } from '@/lib/supabase';
 import Countdown from './Countdown';
+import eniobanke from './assets/sponsors/eniobanke.png';
+import adekola from './assets/sponsors/adekola.png';
+import dolikin from './assets/sponsors/dolikin.png';
+import mt from './assets/sponsors/mt.png';
+import airpath from './assets/sponsors/airpath.png';
+import leoAutos from './assets/sponsors/leo-autos.png';
+import crest from './assets/sponsors/crest.png';
+import jk from './assets/sponsors/jk.png';
 
 type Theme = 'day' | 'night';
 
@@ -46,7 +54,8 @@ const navItems = [
 
 const lineupByStage: Record<Stage, { time: string; name: string; tag: string }[]> = {
   main: [
-    { time: '9:00 PM', name: 'Doors open', tag: 'Welcome to iRave' },
+    { time: '8:00 PM', name: 'Doors open', tag: 'Welcome to iRave' },
+    { time: '9:00 PM', name: 'The party starts', tag: 'Till dawn' },
     { time: '10:30 PM', name: 'Warm-up selectors', tag: 'Afrobeats · Amapiano' },
     { time: '12:00 AM', name: 'The Oblee set', tag: 'Main room' },
     { time: '02:00 AM', name: 'Special guest', tag: 'TBA' },
@@ -82,6 +91,18 @@ const ticketOptions: TicketOption[] = [
 
 const ticketsUrl = 'https://nairaevents.com/events/irave-2-0-the-oblee-edition';
 
+// Taken from the "Powered by" strip on the flyer. The last two logos carry no readable name.
+const sponsors: { name: string; logo: string }[] = [
+  { name: 'Eniobanke', logo: eniobanke },
+  { name: 'Adekola', logo: adekola },
+  { name: 'Dolikin', logo: dolikin },
+  { name: 'MT', logo: mt },
+  { name: 'Airpath', logo: airpath },
+  { name: 'Leo Autos', logo: leoAutos },
+  { name: 'Partner crest', logo: crest },
+  { name: 'JK', logo: jk },
+];
+
 const faqs = [
   {
     question: 'Where is iRave happening?',
@@ -91,7 +112,7 @@ const faqs = [
   {
     question: 'What time should I arrive?',
     answer:
-      'Doors open at 9:00 PM and the night runs till dawn. Come early for the warm-up sets and a smoother entry before the room gets loud.',
+      'Doors open at 8:00 PM and the party starts at 9:00 PM, running till dawn. Come early for a smoother entry before the room gets loud.',
   },
   {
     question: 'Can I buy at the door?',
@@ -282,7 +303,7 @@ function App() {
         <div className="hero-date-card">
           <span className="date-card-label">Save the feeling</span>
           <strong>12<span>·</span>12</strong>
-          <span className="date-card-meta">Saturday · 9 PM till dawn</span>
+          <span className="date-card-meta">Saturday · doors 8 PM · party 9 PM</span>
         </div>
         <div className="hero-footer">
           <span>Ibadan, Nigeria</span>
@@ -402,7 +423,7 @@ function App() {
         <div className="section-label"><span>05</span><span>Plan your night</span></div>
         <div className="info-main" data-reveal>
           <div className="info-card location-card"><div className="info-icon"><MapPin size={20} aria-hidden="true" /></div><p className="eyebrow">The address</p><h3>Ibadan North LGA Car Park</h3><p>Opposite Government House, Agodi Gate, Ibadan.</p></div>
-          <div className="info-card date-card"><div className="info-icon"><CalendarDays size={20} aria-hidden="true" /></div><p className="eyebrow">The date</p><h3>Saturday<br />12 December</h3><p>Doors open at 9 PM. The city starts moving earlier.</p></div>
+          <div className="info-card date-card"><div className="info-icon"><CalendarDays size={20} aria-hidden="true" /></div><p className="eyebrow">The date</p><h3>Saturday<br />12 December</h3><p>Doors open at 8 PM. The party starts at 9 PM, till dawn.</p></div>
           <div className="info-card contact-card"><div className="info-icon"><Mail size={20} aria-hidden="true" /></div><p className="eyebrow">Enquiries and sponsorship</p><h3>Call the<br />team.</h3><p>+234 802 315 2346<br />+234 706 175 3137</p></div>
         </div>
       </section>
@@ -410,6 +431,23 @@ function App() {
       <section className="faq section-grid">
         <div className="section-label"><span>06</span><span>Good to know</span></div>
         <div className="faq-main" data-reveal><div><p className="eyebrow">Before you pull up</p><h2>Questions?<br /><em>Answered.</em></h2></div><div className="faq-list">{faqs.map((faq, index) => (<div key={faq.question} className={`faq-item ${openFaq === index ? 'is-open' : ''}`}><button onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-expanded={openFaq === index}><span>{faq.question}</span><ChevronDown size={17} aria-hidden="true" /></button>{openFaq === index && <p>{faq.answer}</p>}</div>))}</div></div>
+      </section>
+
+      <section className="sponsors section-grid" id="sponsors" aria-labelledby="sponsors-title">
+        <div className="section-label"><span>07</span><span>Powered by</span></div>
+        <div className="sponsors-main" data-reveal>
+          <p className="eyebrow">With thanks to</p>
+          <h2 id="sponsors-title">Our<br /><em>sponsors.</em></h2>
+          <ul className="sponsor-list">
+            {sponsors.map((sponsor) => (
+              <li className="sponsor-item" key={sponsor.name}>
+                <img src={sponsor.logo} alt={sponsor.name} loading="lazy" />
+                <span>{sponsor.name}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="sponsor-cta">Want to sponsor iRave? Call <a href="tel:+2348023152346">+234 802 315 2346</a> or <a href="tel:+2347061753137">+234 706 175 3137</a>.</p>
+        </div>
       </section>
 
       <footer className="site-footer"><div className="footer-top"><div><div className="footer-logo"><span className="brand-symbol">J</span> Jah Ent.</div><p>For the ones who know<br />how to move.</p></div><a className="button button-light" href={ticketsUrl} target="_blank" rel="noreferrer">Get your pass</a></div><p className="footer-meta">2026 iRave 2.0 · Oblee edition</p></footer>

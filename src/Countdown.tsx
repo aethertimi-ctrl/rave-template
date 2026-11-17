@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-// Doors open 9:00 PM, Saturday 12 December 2026, Nigeria time (WAT, +01:00),
-// so the countdown is correct for visitors in any timezone.
-const DOORS_OPEN = new Date('2026-12-12T21:00:00+01:00');
+// Doors open 8:00 PM (party starts 9:00 PM), Saturday 12 December 2026, Nigeria time
+// (WAT, +01:00), so the countdown is correct for visitors in any timezone.
+const DOORS_OPEN = new Date('2026-12-12T20:00:00+01:00');
 
 function Countdown() {
   const [now, setNow] = useState(() => Date.now());

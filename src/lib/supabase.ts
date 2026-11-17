@@ -1,4 +1,4 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createClient, FunctionsHttpError, type SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -13,12 +13,16 @@ export type RsvpSubmission = {
   ticket_type: string;
 };
 
-export async function submitRsvp(payload: RsvpSubmission): Promise<{
+export type RsvpResult = {
   ok: boolean;
   duplicate?: boolean;
   message?: string;
   error?: string;
-}> {
+};
+
+const GENERIC_ERROR = 'We could not save that RSVP. Please try again.';
+
+export async function submitRsvp(payload: RsvpSubmission): Promise<RsvpResult> {
   if (!supabase) {
     return {
       ok: false,
@@ -32,29 +36,31 @@ export async function submitRsvp(payload: RsvpSubmission): Promise<{
     });
 
     if (error) {
-      const message = error.message?.toLowerCase() ?? '';
-      if (message.includes('duplicate') || message.includes('already')) {
-        return {
-          ok: false,
-          duplicate: true,
-          error: 'You are already on the list. We will send the next drop to your inbox.',
-        };
+      // For non-2xx replies supabase-js only says "returned a non-2xx status code";
+      // the real message is in the response body, so read it from there.
+      if (error instanceof FunctionsHttpError) {
+        try {
+          const response = error.context as Response;
+          const body = await response.json();
+          if (body?.duplicate) return { ok: false, duplicate: true };
+          if (typeof body?.message === 'string' && response.status < 500) {
+            return { ok: false, error: body.message };
+          }
+        } catch {
+          // body was not JSON: fall through to the generic message
+        }
       }
-
-      return {
-        ok: false,
-        error: 'We could not save that RSVP. Please try again.',
-      };
+      return { ok: false, error: GENERIC_ERROR };
     }
+
+    if (data?.duplicate) return { ok: false, duplicate: true };
+    if (data?.success === false) return { ok: false, error: data?.message ?? GENERIC_ERROR };
 
     return {
       ok: true,
       message: data?.message ?? 'You are on the list. We will send the next drop to your inbox.',
     };
   } catch {
-    return {
-      ok: false,
-      error: 'We could not save that RSVP. Please try again.',
-    };
+    return { ok: false, error: GENERIC_ERROR };
   }
 }
