@@ -30,7 +30,7 @@ Notes:
 - `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are provided to Edge Functions automatically. You do not add them as secrets.
 - Configure the Edge Function secrets `ALLOWED_ORIGINS` as a comma-separated list of exact site origins (for example, `https://your-account.github.io` and your custom domain). Requests from other browser origins will not receive CORS permission.
 - Set `RSVP_RATE_LIMIT_SALT` to a long random secret in the Edge Function secrets. If omitted, the function uses the service-role key as its hashing pepper. Never expose either secret in `VITE_` variables.
-- The function limits each proxy-reported client IP to five valid RSVP attempts per hour. It stores only a salted SHA-256 hash, not the raw IP. Confirm your hosting/proxy sets `cf-connecting-ip`, `x-real-ip`, or a trusted `x-forwarded-for` header; do not trust client-supplied forwarding headers if your deployment does not overwrite them.
+- The function limits each proxy-reported client IP to twenty valid RSVP attempts per hour. It stores only a salted SHA-256 hash, not the raw IP. Confirm your hosting/proxy sets `cf-connecting-ip`, `x-real-ip`, or a trusted `x-forwarded-for` header; do not trust client-supplied forwarding headers if your deployment does not overwrite them.
 - CORS is a browser boundary, not authentication or bot protection. The Edge Function validates all fields, checks the honeypot, caps request bodies, and applies server-side throttling.
 - If the browser gets a 401 from the function and you use the newer "publishable" API key instead of the legacy anon key,
   turn off "Verify JWT" for this function (CLI: `--no-verify-jwt`).
