@@ -426,7 +426,7 @@ function App() {
 
       <section className="faq section-grid">
         <div className="section-label"><span>06</span><span>Good to know</span></div>
-        <div className="faq-main" data-reveal><div><p className="eyebrow">Before you pull up</p><h2>Questions?<br /><em>Answered.</em></h2></div><div className="faq-list">{faqs.map((faq, index) => (<div key={faq.question} className={`faq-item ${openFaq === index ? 'is-open' : ''}`}><button id={`faq-trigger-${index}`} onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-controls={`faq-panel-${index}`} aria-expanded={openFaq === index}><span>{faq.question}</span><ChevronDown size={17} aria-hidden="true" /></button>{openFaq === index && <p id={`faq-panel-${index}`} role="region" aria-labelledby={`faq-trigger-${index}`}>{faq.answer}</p>}</div>))}</div></div>
+        <div className="faq-main" data-reveal><div><p className="eyebrow">Before you pull up</p><h2>Questions?<br /><em>Answered.</em></h2></div><div className="faq-list">{faqs.map((faq, index) => (<div key={faq.question} className={`faq-item ${openFaq === index ? 'is-open' : ''}`}><button id={`faq-trigger-${index}`} onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-controls={`faq-panel-${index}`} aria-expanded={openFaq === index}><span>{faq.question}</span><ChevronDown size={17} aria-hidden="true" /></button><p id={`faq-panel-${index}`} hidden={openFaq !== index} role="region" aria-labelledby={`faq-trigger-${index}`}>{faq.answer}</p></div>))}</div></div>
       </section>
 
       <section className="sponsors section-grid" id="sponsors" aria-labelledby="sponsors-title">
