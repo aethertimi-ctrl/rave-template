@@ -52,7 +52,7 @@ $$;
 REVOKE ALL ON FUNCTION public.consume_irave_rsvp_rate_limit(text, integer, integer) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.consume_irave_rsvp_rate_limit(text, integer, integer) TO service_role;
 
--- Keep the table bounded without requiring pg_cron. Expired keys are removed during requests.
+-- Optional cleanup routine for a scheduled Supabase job or an operator-triggered maintenance call.
 CREATE OR REPLACE FUNCTION public.prune_irave_rsvp_rate_limits()
 RETURNS void
 LANGUAGE sql
