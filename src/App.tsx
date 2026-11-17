@@ -62,23 +62,25 @@ const ticketOptions: TicketOption[] = [
   {
     name: 'Regular pass',
     price: '₦3,000',
-    description: 'Your all-access entry into the Oblee edition.',
-    perks: ['General entry', 'Main room access', 'Good energy guaranteed'],
+    description: 'General admission to the Oblee edition.',
+    perks: ['General admission'],
   },
   {
     name: 'Group of 4',
     price: '₦10,000',
-    description: 'Bring your people. Four passes, one better night.',
+    description: 'Bring your people. Four regular tickets, one better night.',
     featured: true,
-    perks: ['Entry for four', 'Priority group lane', 'Main room access'],
+    perks: ['Admits 4 people', 'General admission'],
   },
   {
     name: 'Table of 4',
     price: '₦100,000',
-    description: 'Your own corner of the night with table service.',
-    perks: ['Reserved table for four', 'Premium table service', 'Fast-track entry'],
+    description: 'Your own VIP corner of the night, drinks included.',
+    perks: ['VIP access', 'Drinks included', 'Table for four'],
   },
 ];
+
+const ticketsUrl = 'https://nairaevents.com/events/irave-2-0-the-oblee-edition';
 
 const faqs = [
   {
@@ -94,7 +96,7 @@ const faqs = [
   {
     question: 'Can I buy at the door?',
     answer:
-      'Door availability depends on capacity. Join the guest list here first so you get the ticket release before it sells out.',
+      'Door availability depends on capacity. Buy your ticket early on Nairaevents so you are not left outside, and join the guest list here for updates.',
   },
   {
     question: 'Is there a dress code?',
@@ -272,9 +274,10 @@ function App() {
           <h1>iRave<span>2.0</span></h1>
           <p className="hero-subtitle">A city-wide release of sound, colour, and unapologetic movement.</p>
           <div className="hero-actions">
-            <button className="button button-light" onClick={() => scrollToSection('#tickets')}>
+            <a className="button button-light" href={ticketsUrl} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
               Get your pass <ArrowUpRight size={17} aria-hidden="true" />
-            </button>
+              <span className="sr-only"> (opens Nairaevents in a new tab)</span>
+            </a>
             <button className="text-link" onClick={() => scrollToSection('#the-night')}>
               Discover the night <ArrowDown size={17} aria-hidden="true" />
             </button>
@@ -371,6 +374,13 @@ function App() {
               </article>
             ))}
           </div>
+          <a className="button button-dark" href={ticketsUrl} target="_blank" rel="noreferrer" style={{ marginTop: 28, textDecoration: 'none' }}>
+            Buy tickets on Nairaevents <ArrowUpRight size={17} aria-hidden="true" />
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+          <p className="ticket-note" style={{ fontSize: 12, lineHeight: 1.5, margin: '14px 0 0', opacity: 0.75 }}>
+            Tickets are sold on Nairaevents. A small booking fee applies at checkout on Regular and Group of 4 tickets.
+          </p>
         </div>
       </section>
 
