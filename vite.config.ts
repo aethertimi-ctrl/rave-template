@@ -4,6 +4,8 @@ import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // Relative base so the build works on GitHub Pages project sites (/repo-name/) and on any host.
+  base: './',
   plugins: [react()],
   resolve: {
     alias: {
