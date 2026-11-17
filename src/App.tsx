@@ -1,4 +1,4 @@
-import { FormEvent, KeyboardEvent, useEffect, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import {
   ArrowDown,
   ArrowUpRight,
@@ -18,7 +18,7 @@ import {
   Ticket,
   X,
 } from 'lucide-react';
-import { submitRsvp } from '@/lib/supabase';
+import { submitRsvp, type RsvpResult } from '@/lib/supabase';
 import { EVENT_TICKET_OPTIONS, type TicketType } from '@/config/event';
 import Countdown from './Countdown';
 import eniobanke from './assets/sponsors/eniobanke.png';
@@ -112,6 +112,8 @@ function getInitialTheme(): Theme {
 function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
+  const wasMenuOpen = useRef(false);
   const [stage, setStage] = useState<Stage>('main');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [selectedTicket, setSelectedTicket] = useState<TicketType>('Regular pass');
@@ -144,7 +146,12 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!menuOpen) return;
+    if (!menuOpen) {
+      if (wasMenuOpen.current) menuToggleRef.current?.focus();
+      wasMenuOpen.current = false;
+      return;
+    }
+    wasMenuOpen.current = true;
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
       if (event.key === 'Escape') setMenuOpen(false);
     };
@@ -205,7 +212,7 @@ function App() {
     }
 
     setIsSubmitting(true);
-    let result;
+    let result: RsvpResult;
     try {
       result = await submitRsvp({
         name: cleanName,
@@ -263,6 +270,7 @@ function App() {
             {theme === 'day' ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />}
           </button>
           <button
+            ref={menuToggleRef}
             className="menu-toggle"
             onClick={() => setMenuOpen((current) => !current)}
             aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
