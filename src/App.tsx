@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { submitRsvp } from '@/lib/supabase';
+import { EVENT_TICKET_OPTIONS, type TicketType } from '@/config/event';
 import Countdown from './Countdown';
 import eniobanke from './assets/sponsors/eniobanke.png';
 import adekola from './assets/sponsors/adekola.png';
@@ -31,16 +32,8 @@ import jk from './assets/sponsors/jk.png';
 
 type Theme = 'day' | 'night';
 
-type TicketType = 'Regular pass' | 'Group of 4' | 'Table of 4';
 type Stage = 'main' | 'after';
 
-type TicketOption = {
-  name: TicketType;
-  price: string;
-  description: string;
-  featured?: boolean;
-  perks: string[];
-};
 
 const heroImage =
   'https://images.pexels.com/photos/32399568/pexels-photo-32399568.jpeg?auto=compress&cs=tinysrgb&h=1400&w=2200';
@@ -67,27 +60,7 @@ const lineupByStage: Record<Stage, { time: string; name: string; tag: string }[]
   ],
 };
 
-const ticketOptions: TicketOption[] = [
-  {
-    name: 'Regular pass',
-    price: '₦3,000',
-    description: 'General admission to the Oblee edition.',
-    perks: ['General admission'],
-  },
-  {
-    name: 'Group of 4',
-    price: '₦10,000',
-    description: 'Bring your people. Four regular tickets, one better night.',
-    featured: true,
-    perks: ['Admits 4 people', 'General admission'],
-  },
-  {
-    name: 'Table of 4',
-    price: '₦100,000',
-    description: 'Your own VIP corner of the night, drinks included.',
-    perks: ['VIP access', 'Drinks included', 'Table for four'],
-  },
-];
+const ticketOptions = EVENT_TICKET_OPTIONS;
 
 const ticketsUrl = 'https://nairaevents.com/events/irave-2-0-the-oblee-edition';
 
@@ -151,6 +124,10 @@ function App() {
 
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    if (typeof IntersectionObserver === 'undefined') {
+      elements.forEach((element) => element.classList.add('is-visible'));
+      return;
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -165,6 +142,15 @@ function App() {
     elements.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [menuOpen]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -219,12 +205,20 @@ function App() {
     }
 
     setIsSubmitting(true);
-    const result = await submitRsvp({
-      name: cleanName,
-      email: cleanEmail,
-      ticket_type: selectedTicket,
-    });
-    setIsSubmitting(false);
+    let result;
+    try {
+      result = await submitRsvp({
+        name: cleanName,
+        email: cleanEmail,
+        ticket_type: selectedTicket,
+        website: trap,
+      });
+    } catch {
+      setSubmitError('We could not save that RSVP. Please try again.');
+      return;
+    } finally {
+      setIsSubmitting(false);
+    }
 
     if (!result.ok) {
       if (result.duplicate) {
@@ -271,7 +265,7 @@ function App() {
           <button
             className="menu-toggle"
             onClick={() => setMenuOpen((current) => !current)}
-            aria-label="Toggle navigation menu"
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={menuOpen}
             aria-controls="nav-links"
           >
@@ -404,8 +398,8 @@ function App() {
         <div className="rsvp-main" data-reveal>
           <div className="rsvp-copy"><p className="eyebrow">The guest list is open</p><h2>Be there<br />when it <em>drops.</em></h2><p className="body-copy">Leave your details and we will send you the next drop before doors open.</p></div>
           <form className="rsvp-form" onSubmit={handleRsvpSubmit} noValidate>
-            <label htmlFor="name">Your name<input id="name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Tell us what to call you" /></label>
-            <label htmlFor="email">Your email<input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
+            <label htmlFor="name">Your name<input id="name" name="name" type="text" autoComplete="name" required maxLength={80} value={name} onChange={(event) => setName(event.target.value)} placeholder="Tell us what to call you" /></label>
+            <label htmlFor="email">Your email<input id="email" name="email" type="email" autoComplete="email" required maxLength={160} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
             <label htmlFor="ticket">I am eyeing<select id="ticket" name="ticket" value={selectedTicket} onChange={(event) => setSelectedTicket(event.target.value as TicketType)}>{ticketOptions.map((ticket) => <option key={ticket.name} value={ticket.name}>{ticket.name}</option>)}</select></label>
             <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
               <label htmlFor="company_url">Leave this empty<input id="company_url" name="company_url" type="text" tabIndex={-1} autoComplete="off" value={trap} onChange={(event) => setTrap(event.target.value)} /></label>
