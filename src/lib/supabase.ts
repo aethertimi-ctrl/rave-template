@@ -11,6 +11,7 @@ export type RsvpSubmission = {
   name: string;
   email: string;
   ticket_type: string;
+  website?: string;
 };
 
 export type RsvpResult = {

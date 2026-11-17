@@ -1,4 +1,4 @@
-import { FormEvent, KeyboardEvent, useEffect, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import {
   ArrowDown,
   ArrowUpRight,
@@ -18,7 +18,8 @@ import {
   Ticket,
   X,
 } from 'lucide-react';
-import { submitRsvp } from '@/lib/supabase';
+import { submitRsvp, type RsvpResult } from '@/lib/supabase';
+import { EVENT_TICKET_OPTIONS, type TicketType } from '@/config/event';
 import Countdown from './Countdown';
 import eniobanke from './assets/sponsors/eniobanke.png';
 import adekola from './assets/sponsors/adekola.png';
@@ -31,16 +32,8 @@ import jk from './assets/sponsors/jk.png';
 
 type Theme = 'day' | 'night';
 
-type TicketType = 'Regular pass' | 'Group of 4' | 'Table of 4';
 type Stage = 'main' | 'after';
 
-type TicketOption = {
-  name: TicketType;
-  price: string;
-  description: string;
-  featured?: boolean;
-  perks: string[];
-};
 
 const heroImage =
   'https://images.pexels.com/photos/32399568/pexels-photo-32399568.jpeg?auto=compress&cs=tinysrgb&h=1400&w=2200';
@@ -67,27 +60,7 @@ const lineupByStage: Record<Stage, { time: string; name: string; tag: string }[]
   ],
 };
 
-const ticketOptions: TicketOption[] = [
-  {
-    name: 'Regular pass',
-    price: '₦3,000',
-    description: 'General admission to the Oblee edition.',
-    perks: ['General admission'],
-  },
-  {
-    name: 'Group of 4',
-    price: '₦10,000',
-    description: 'Bring your people. Four regular tickets, one better night.',
-    featured: true,
-    perks: ['Admits 4 people', 'General admission'],
-  },
-  {
-    name: 'Table of 4',
-    price: '₦100,000',
-    description: 'Your own VIP corner of the night, drinks included.',
-    perks: ['VIP access', 'Drinks included', 'Table for four'],
-  },
-];
+const ticketOptions = EVENT_TICKET_OPTIONS;
 
 const ticketsUrl = 'https://nairaevents.com/events/irave-2-0-the-oblee-edition';
 
@@ -139,6 +112,8 @@ function getInitialTheme(): Theme {
 function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuToggleRef = useRef<HTMLButtonElement>(null);
+  const wasMenuOpen = useRef(false);
   const [stage, setStage] = useState<Stage>('main');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [selectedTicket, setSelectedTicket] = useState<TicketType>('Regular pass');
@@ -151,6 +126,10 @@ function App() {
 
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+    if (typeof IntersectionObserver === 'undefined') {
+      elements.forEach((element) => element.classList.add('is-visible'));
+      return;
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -165,6 +144,20 @@ function App() {
     elements.forEach((element) => observer.observe(element));
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!menuOpen) {
+      if (wasMenuOpen.current) menuToggleRef.current?.focus();
+      wasMenuOpen.current = false;
+      return;
+    }
+    wasMenuOpen.current = true;
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [menuOpen]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -200,12 +193,6 @@ function App() {
     setSubmitMessage('');
     setSubmitError('');
 
-    // Honeypot tripped: pretend success so bots learn nothing.
-    if (trap) {
-      setSubmitMessage('You are on the list. We will send the next drop to your inbox.');
-      return;
-    }
-
     const cleanName = name.trim();
     const cleanEmail = email.trim().toLowerCase();
 
@@ -219,12 +206,20 @@ function App() {
     }
 
     setIsSubmitting(true);
-    const result = await submitRsvp({
-      name: cleanName,
-      email: cleanEmail,
-      ticket_type: selectedTicket,
-    });
-    setIsSubmitting(false);
+    let result: RsvpResult;
+    try {
+      result = await submitRsvp({
+        name: cleanName,
+        email: cleanEmail,
+        ticket_type: selectedTicket,
+        website: trap,
+      });
+    } catch {
+      setSubmitError('We could not save that RSVP. Please try again.');
+      return;
+    } finally {
+      setIsSubmitting(false);
+    }
 
     if (!result.ok) {
       if (result.duplicate) {
@@ -269,9 +264,10 @@ function App() {
             {theme === 'day' ? <Moon size={17} aria-hidden="true" /> : <Sun size={17} aria-hidden="true" />}
           </button>
           <button
+            ref={menuToggleRef}
             className="menu-toggle"
             onClick={() => setMenuOpen((current) => !current)}
-            aria-label="Toggle navigation menu"
+            aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={menuOpen}
             aria-controls="nav-links"
           >
@@ -404,8 +400,8 @@ function App() {
         <div className="rsvp-main" data-reveal>
           <div className="rsvp-copy"><p className="eyebrow">The guest list is open</p><h2>Be there<br />when it <em>drops.</em></h2><p className="body-copy">Leave your details and we will send you the next drop before doors open.</p></div>
           <form className="rsvp-form" onSubmit={handleRsvpSubmit} noValidate>
-            <label htmlFor="name">Your name<input id="name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Tell us what to call you" /></label>
-            <label htmlFor="email">Your email<input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
+            <label htmlFor="name">Your name<input id="name" name="name" type="text" autoComplete="name" required maxLength={80} value={name} onChange={(event) => setName(event.target.value)} placeholder="Tell us what to call you" /></label>
+            <label htmlFor="email">Your email<input id="email" name="email" type="email" autoComplete="email" required maxLength={160} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
             <label htmlFor="ticket">I am eyeing<select id="ticket" name="ticket" value={selectedTicket} onChange={(event) => setSelectedTicket(event.target.value as TicketType)}>{ticketOptions.map((ticket) => <option key={ticket.name} value={ticket.name}>{ticket.name}</option>)}</select></label>
             <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
               <label htmlFor="company_url">Leave this empty<input id="company_url" name="company_url" type="text" tabIndex={-1} autoComplete="off" value={trap} onChange={(event) => setTrap(event.target.value)} /></label>
@@ -422,15 +418,15 @@ function App() {
       <section className="info section-grid" id="info">
         <div className="section-label"><span>05</span><span>Plan your night</span></div>
         <div className="info-main" data-reveal>
-          <div className="info-card location-card"><div className="info-icon"><MapPin size={20} aria-hidden="true" /></div><p className="eyebrow">The address</p><h3>Ibadan North LGA Car Park</h3><p>Opposite Government House, Agodi Gate, Ibadan.</p></div>
+          <div className="info-card location-card"><div className="info-icon"><MapPin size={20} aria-hidden="true" /></div><p className="eyebrow">The address</p><h3>Ibadan North LGA Car Park</h3><p>Opposite Government House, Agodi Gate, Ibadan.</p><a href="https://www.google.com/maps/search/?api=1&query=Ibadan+North+LGA+Car+Park%2C+Agodi+Gate%2C+Ibadan%2C+Nigeria" target="_blank" rel="noreferrer">Open directions <ArrowUpRight size={14} aria-hidden="true" /></a></div>
           <div className="info-card date-card"><div className="info-icon"><CalendarDays size={20} aria-hidden="true" /></div><p className="eyebrow">The date</p><h3>Saturday<br />12 December</h3><p>Doors open at 8 PM. The party starts at 9 PM, till dawn.</p></div>
-          <div className="info-card contact-card"><div className="info-icon"><Mail size={20} aria-hidden="true" /></div><p className="eyebrow">Enquiries and sponsorship</p><h3>Call the<br />team.</h3><p>+234 802 315 2346<br />+234 706 175 3137</p></div>
+          <div className="info-card contact-card"><div className="info-icon"><Mail size={20} aria-hidden="true" /></div><p className="eyebrow">Enquiries and sponsorship</p><h3>Call the<br />team.</h3><p><a href="tel:+2348023152346">+234 802 315 2346</a><br /><a href="tel:+2347061753137">+234 706 175 3137</a></p></div>
         </div>
       </section>
 
       <section className="faq section-grid">
         <div className="section-label"><span>06</span><span>Good to know</span></div>
-        <div className="faq-main" data-reveal><div><p className="eyebrow">Before you pull up</p><h2>Questions?<br /><em>Answered.</em></h2></div><div className="faq-list">{faqs.map((faq, index) => (<div key={faq.question} className={`faq-item ${openFaq === index ? 'is-open' : ''}`}><button onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-expanded={openFaq === index}><span>{faq.question}</span><ChevronDown size={17} aria-hidden="true" /></button>{openFaq === index && <p>{faq.answer}</p>}</div>))}</div></div>
+        <div className="faq-main" data-reveal><div><p className="eyebrow">Before you pull up</p><h2>Questions?<br /><em>Answered.</em></h2></div><div className="faq-list">{faqs.map((faq, index) => (<div key={faq.question} className={`faq-item ${openFaq === index ? 'is-open' : ''}`}><button id={`faq-trigger-${index}`} onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-controls={`faq-panel-${index}`} aria-expanded={openFaq === index}><span>{faq.question}</span><ChevronDown size={17} aria-hidden="true" /></button><p id={`faq-panel-${index}`} hidden={openFaq !== index} role="region" aria-labelledby={`faq-trigger-${index}`}>{faq.answer}</p></div>))}</div></div>
       </section>
 
       <section className="sponsors section-grid" id="sponsors" aria-labelledby="sponsors-title">

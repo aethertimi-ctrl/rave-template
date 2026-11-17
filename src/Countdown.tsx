@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
+import { EVENT_DOORS_OPEN_AT, EVENT_ENDS_AT } from '@/config/event';
 
-// Doors open 8:00 PM (party starts 9:00 PM), Saturday 12 December 2026, Nigeria time
-// (WAT, +01:00), so the countdown is correct for visitors in any timezone.
-const DOORS_OPEN = new Date('2026-12-12T20:00:00+01:00');
 
 function Countdown() {
   const [now, setNow] = useState(() => Date.now());
@@ -12,7 +10,8 @@ function Countdown() {
     return () => window.clearInterval(id);
   }, []);
 
-  const timeLeft = Math.max(0, DOORS_OPEN.getTime() - now);
+  const timeLeft = Math.max(0, EVENT_DOORS_OPEN_AT.getTime() - now);
+  const eventHasEnded = now >= EVENT_ENDS_AT.getTime();
   const cells = [
     { label: 'Days', value: Math.floor(timeLeft / 86400000) },
     { label: 'Hours', value: Math.floor(timeLeft / 3600000) % 24 },
@@ -21,8 +20,10 @@ function Countdown() {
   ];
 
   return (
-    <div className="countdown" role="timer" aria-label="Countdown to doors open">
-      {timeLeft === 0 ? (
+    <div className="countdown" role="timer" aria-label="Countdown to doors open" aria-live="off">
+      {eventHasEnded ? (
+        <span className="countdown-live">That was iRave 2.0. Thanks for being part of it!</span>
+      ) : timeLeft === 0 ? (
         <span className="countdown-live">Doors are open — pull up!</span>
       ) : (
         cells.map((cell) => (
