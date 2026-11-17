@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const allowedTicketTypes = new Set(['Regular pass', 'Group of 4', 'Table of 4']);
 const isValidEmail = (value: string): boolean => /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(value);
 const MAX_BODY_BYTES = 10_000;
-const RATE_LIMIT = 5;
+const RATE_LIMIT = 20;
 const RATE_WINDOW_SECONDS = 60 * 60;
 
 function corsHeaders(req: Request): Record<string, string> {
