@@ -18,7 +18,7 @@ import {
   Ticket,
   X,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { submitRsvp } from '@/lib/supabase';
 import Countdown from './Countdown';
 
 type Theme = 'day' | 'night';
@@ -197,30 +197,24 @@ function App() {
       return;
     }
 
-    if (!supabase) {
-      setSubmitError('The guest list is not open yet. Call +234 802 315 2346 or +234 706 175 3137 to be added.');
-      return;
-    }
-
     setIsSubmitting(true);
-    const { error } = await supabase.from('irave_rsvps').insert({
+    const result = await submitRsvp({
       name: cleanName,
       email: cleanEmail,
       ticket_type: selectedTicket,
     });
     setIsSubmitting(false);
 
-    if (error) {
-      // 23505 = unique violation: this email is already on the list.
-      if (error.code === '23505') {
+    if (!result.ok) {
+      if (result.duplicate) {
         setSubmitMessage('You are already on the list. We will send the next drop to your inbox.');
         return;
       }
-      setSubmitError('We could not save that RSVP. Please try again.');
+      setSubmitError(result.error ?? 'We could not save that RSVP. Please try again.');
       return;
     }
 
-    setSubmitMessage('You are on the list. We will send the next drop to your inbox.');
+    setSubmitMessage(result.message ?? 'You are on the list. We will send the next drop to your inbox.');
     setName('');
     setEmail('');
   };
@@ -311,7 +305,7 @@ function App() {
         <div className="manifesto-copy" data-reveal>
           <p className="eyebrow">Not just another party</p>
           <h2>The city gets<br /><em>louder.</em></h2>
-          <p className="body-copy">iRave is a full-sensory night for the people who make Ibadan move. A meeting point for great music, bold fits, new faces, and that one song that changes the whole room.</p>
+          <p className="body-copy">iRave is a full-sensory night for the people who make Ibadan move. A meeting point for great music, bold fits, new faces, and that one song that changes the whole night.</p>
           <div className="manifesto-detail"><span className="detail-mark"><Sparkles size={19} aria-hidden="true" /></span><span>One night.<br /><strong>Zero quiet moments.</strong></span></div>
         </div>
         <div className="manifesto-side" data-reveal style={{ transitionDelay: '.12s' }}>
@@ -387,15 +381,15 @@ function App() {
       <section className="rsvp section-grid" id="rsvp">
         <div className="section-label"><span>04</span><span>Make it official</span></div>
         <div className="rsvp-main" data-reveal>
-          <div className="rsvp-copy"><p className="eyebrow">The guest list is open</p><h2>Be there<br />when it <em>drops.</em></h2><p className="body-copy">Leave your details and we will send you the next update before the room fills up. Joining the list does not reserve or pay for a ticket.</p></div>
+          <div className="rsvp-copy"><p className="eyebrow">The guest list is open</p><h2>Be there<br />when it <em>drops.</em></h2><p className="body-copy">Leave your details and we will send you the next drop before doors open.</p></div>
           <form className="rsvp-form" onSubmit={handleRsvpSubmit} noValidate>
-            <label htmlFor="name">Your name<input id="name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Tell us what to call you" required minLength={2} maxLength={80} /></label>
-            <label htmlFor="email">Your email<input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" required maxLength={160} /></label>
+            <label htmlFor="name">Your name<input id="name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="Tell us what to call you" /></label>
+            <label htmlFor="email">Your email<input id="email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" /></label>
             <label htmlFor="ticket">I am eyeing<select id="ticket" name="ticket" value={selectedTicket} onChange={(event) => setSelectedTicket(event.target.value as TicketType)}>{ticketOptions.map((ticket) => <option key={ticket.name} value={ticket.name}>{ticket.name}</option>)}</select></label>
             <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
               <label htmlFor="company_url">Leave this empty<input id="company_url" name="company_url" type="text" tabIndex={-1} autoComplete="off" value={trap} onChange={(event) => setTrap(event.target.value)} /></label>
             </div>
-            <button className="button button-dark" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving your spot…' : 'Join the guest list'} {isSubmitting ? <Clock3 size={17} className="spin" aria-hidden="true" /> : <ArrowUpRight size={17} aria-hidden="true" />}</button>
+            <button className="button button-dark" type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving your spot…' : 'Join the guest list'} {isSubmitting ? <Clock3 size={17} aria-hidden="true" /> : null}</button>
             <div aria-live="polite">
               {submitMessage && <p className="form-success" role="status"><Check size={16} aria-hidden="true" /> {submitMessage}</p>}
               {submitError && <p className="form-error" role="alert">{submitError}</p>}
@@ -407,18 +401,18 @@ function App() {
       <section className="info section-grid" id="info">
         <div className="section-label"><span>05</span><span>Plan your night</span></div>
         <div className="info-main" data-reveal>
-          <div className="info-card location-card"><div className="info-icon"><MapPin size={20} aria-hidden="true" /></div><p className="eyebrow">The address</p><h3>Ibadan North LGA Car Park</h3><p>Opposite Government House,<br />Agodi Gate, Ibadan.</p><a href="https://maps.google.com/?q=Ibadan+North+LGA+Car+Park" target="_blank" rel="noreferrer">Open maps <ArrowUpRight size={15} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a></div>
-          <div className="info-card date-card"><div className="info-icon"><CalendarDays size={20} aria-hidden="true" /></div><p className="eyebrow">The date</p><h3>Saturday<br />12 December</h3><p>Doors open at 9:00 PM<br />and it runs till dawn.</p></div>
-          <div className="info-card contact-card"><div className="info-icon"><Mail size={20} aria-hidden="true" /></div><p className="eyebrow">Enquiries and sponsorship</p><h3>Call the<br />team.</h3><a href="tel:+2348023152346">+234 802 315 2346</a><a href="tel:+2347061753137">+234 706 175 3137</a></div>
+          <div className="info-card location-card"><div className="info-icon"><MapPin size={20} aria-hidden="true" /></div><p className="eyebrow">The address</p><h3>Ibadan North LGA Car Park</h3><p>Opposite Government House, Agodi Gate, Ibadan.</p></div>
+          <div className="info-card date-card"><div className="info-icon"><CalendarDays size={20} aria-hidden="true" /></div><p className="eyebrow">The date</p><h3>Saturday<br />12 December</h3><p>Doors open at 9 PM. The city starts moving earlier.</p></div>
+          <div className="info-card contact-card"><div className="info-icon"><Mail size={20} aria-hidden="true" /></div><p className="eyebrow">Enquiries and sponsorship</p><h3>Call the<br />team.</h3><p>+234 802 315 2346<br />+234 706 175 3137</p></div>
         </div>
       </section>
 
       <section className="faq section-grid">
         <div className="section-label"><span>06</span><span>Good to know</span></div>
-        <div className="faq-main" data-reveal><div><p className="eyebrow">Before you pull up</p><h2>Questions?<br /><em>Answered.</em></h2></div><div className="faq-list">{faqs.map((faq, index) => (<div className={`faq-item ${openFaq === index ? 'open' : ''}`} key={faq.question}><button onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-expanded={openFaq === index}>{faq.question}<ChevronDown size={16} aria-hidden="true" /></button>{openFaq === index && <p>{faq.answer}</p>}</div>))}</div></div>
+        <div className="faq-main" data-reveal><div><p className="eyebrow">Before you pull up</p><h2>Questions?<br /><em>Answered.</em></h2></div><div className="faq-list">{faqs.map((faq, index) => (<div key={faq.question} className={`faq-item ${openFaq === index ? 'is-open' : ''}`}><button onClick={() => setOpenFaq(openFaq === index ? null : index)} aria-expanded={openFaq === index}><span>{faq.question}</span><ChevronDown size={17} aria-hidden="true" /></button>{openFaq === index && <p>{faq.answer}</p>}</div>))}</div></div>
       </section>
 
-      <footer className="site-footer"><div className="footer-top"><div><div className="footer-logo"><span className="brand-symbol">J</span> Jah Ent.</div><p>For the ones who know<br />how to move.</p></div><button className="footer-back" onClick={() => scrollToSection('#top')}>Back to top <ArrowUpRight size={15} aria-hidden="true" /></button></div><div className="footer-bottom"><span>iRave 2.0 · The Oblee Edition</span><span>© {new Date().getFullYear()} Jah Entertainment</span></div></footer>
+      <footer className="site-footer"><div className="footer-top"><div><div className="footer-logo"><span className="brand-symbol">J</span> Jah Ent.</div><p>For the ones who know<br />how to move.</p></div><a className="button button-light" href={ticketsUrl} target="_blank" rel="noreferrer">Get your pass</a></div><p className="footer-meta">2026 iRave 2.0 · Oblee edition</p></footer>
     </main>
   );
 }

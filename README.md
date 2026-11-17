@@ -15,13 +15,15 @@ The site renders without the env vars; the guest-list form then shows a friendly
 ## Supabase setup
 
 Run the SQL files in `supabase/migrations/` in order (SQL editor or `supabase db push`).
-RSVPs are insert-only for the public; read them from the Supabase dashboard.
+
+For the public site, the browser no longer writes directly to `irave_rsvps`. Instead, the app calls a Supabase Edge Function named `submit-rsvp`, which performs server-side validation and inserts via the service role key. Public clients are blocked from direct INSERT by the migration files.
 
 ## Deploy (GitHub Pages)
 
 1. Repo **Settings > Pages > Source: GitHub Actions**.
 2. Repo **Settings > Secrets and variables > Actions**: add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-3. Push to `main` (or run the *Deploy to GitHub Pages* workflow).
+3. Deploy the Supabase Edge Function (`supabase/functions/submit-rsvp`) to your Supabase project, and add `SUPABASE_SERVICE_ROLE_KEY` in the project secrets.
+4. Push to `main` (or run the *Deploy to GitHub Pages* workflow).
 
 ## Customising
 
