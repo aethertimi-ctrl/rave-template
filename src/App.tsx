@@ -418,9 +418,9 @@ function App() {
       <section className="info section-grid" id="info">
         <div className="section-label"><span>05</span><span>Plan your night</span></div>
         <div className="info-main" data-reveal>
-          <div className="info-card location-card"><div className="info-icon"><MapPin size={20} aria-hidden="true" /></div><p className="eyebrow">The address</p><h3>Ibadan North LGA Car Park</h3><p>Opposite Government House, Agodi Gate, Ibadan.</p></div>
+          <div className="info-card location-card"><div className="info-icon"><MapPin size={20} aria-hidden="true" /></div><p className="eyebrow">The address</p><h3>Ibadan North LGA Car Park</h3><p>Opposite Government House, Agodi Gate, Ibadan.</p><a href="https://www.google.com/maps/search/?api=1&query=Ibadan+North+LGA+Car+Park%2C+Agodi+Gate%2C+Ibadan%2C+Nigeria" target="_blank" rel="noreferrer">Open directions <ArrowUpRight size={14} aria-hidden="true" /></a></div>
           <div className="info-card date-card"><div className="info-icon"><CalendarDays size={20} aria-hidden="true" /></div><p className="eyebrow">The date</p><h3>Saturday<br />12 December</h3><p>Doors open at 8 PM. The party starts at 9 PM, till dawn.</p></div>
-          <div className="info-card contact-card"><div className="info-icon"><Mail size={20} aria-hidden="true" /></div><p className="eyebrow">Enquiries and sponsorship</p><h3>Call the<br />team.</h3><p>+234 802 315 2346<br />+234 706 175 3137</p></div>
+          <div className="info-card contact-card"><div className="info-icon"><Mail size={20} aria-hidden="true" /></div><p className="eyebrow">Enquiries and sponsorship</p><h3>Call the<br />team.</h3><p><a href="tel:+2348023152346">+234 802 315 2346</a><br /><a href="tel:+2347061753137">+234 706 175 3137</a></p></div>
         </div>
       </section>
 
