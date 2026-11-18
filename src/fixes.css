@@ -158,3 +158,14 @@
   .hero { min-height: 770px; }
   .hero-date-card { bottom: 60px; }
 }
+
+/* 13. "2.0" was clipped on phones. The real Syne font is much wider than a fallback, so the
+   heading plus its superscript "2.0" (about 4.6em wide) overflowed the hero, which clips overflow.
+   Size the heading from the screen width so the whole thing always fits, and keep "2.0" in one piece. */
+.hero h1 span { display: inline-block; white-space: nowrap; }
+@media (max-width: 860px) {
+  .hero h1 { font-size: clamp(52px, 16vw, 130px); }
+}
+@media (max-width: 400px) {
+  .hero h1 { font-size: 15vw; }
+}
