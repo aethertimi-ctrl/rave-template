@@ -153,19 +153,72 @@
   .contact-card a, .site-footer a { display: inline-block; padding: 12px 0; }
 }
 
-/* Phones: the tilted date card touched the countdown. Give the hero a little more room. */
-@media (max-width: 640px) {
-  .hero { min-height: 770px; }
-  .hero-date-card { bottom: 60px; }
+
+/* 13. HERO LAYOUT: rebuilt as a grid so no piece can sit on top of another.
+   Before, the heading block, the "No sleep" stamp, the date card and the footer line were all
+   absolutely positioned, so on some screen sizes they overlapped or were clipped (the "2.0" too).
+   Now every piece takes its own cell and the hero grows to fit its content. */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "content stamp"
+    "content card"
+    "footer  footer";
+  column-gap: 40px;
+  padding: 64px clamp(24px, 5vw, 80px) 0;
+  min-height: min(775px, calc(100vh - 76px));
+  min-height: min(775px, calc(100svh - 76px));
+}
+.hero-content {
+  grid-area: content; align-self: center;
+  position: relative; left: auto; right: auto; top: auto; transform: none; max-width: 980px;
+  padding-left: clamp(0px, 5vw, 80px); z-index: 1;
+  container-type: inline-size;
+}
+.hero-stamp {
+  grid-area: stamp; justify-self: end; align-self: start;
+  position: relative; right: auto; top: auto; margin: 0 clamp(0px, 3vw, 48px) 24px 0; flex: none;
+}
+.hero-date-card {
+  grid-area: card; justify-self: end; align-self: end;
+  position: relative; right: auto; bottom: auto; margin: 24px clamp(8px, 3vw, 48px) 24px 0;
+  width: 185px; transform: rotate(-4deg);
+}
+.hero-footer {
+  grid-area: footer; position: static; left: auto; right: auto; bottom: auto;
+  padding: 18px 0 22px; z-index: 1;
 }
 
-/* 13. "2.0" was clipped on phones. The real Syne font is much wider than a fallback, so the
-   heading plus its superscript "2.0" (about 4.6em wide) overflowed the hero, which clips overflow.
-   Size the heading from the screen width so the whole thing always fits, and keep "2.0" in one piece. */
-.hero h1 span { display: inline-block; white-space: nowrap; }
+/* Heading sized from its own box so "iRave 2.0" (about 4.7em wide in Syne) always fits. */
+.hero h1 { font-size: clamp(56px, 13vw, 200px); overflow-wrap: normal; }
+@supports (font-size: 1cqw) {
+  .hero h1 { font-size: min(17cqw, 210px); }
+}
+/* If a screen is ever too narrow, "2.0" drops to the next line instead of being cut off. */
+.hero h1 span { display: inline-block; }
+
+/* Tablet and phone: one column. The stamp and date card sit side by side under the content. */
 @media (max-width: 860px) {
-  .hero h1 { font-size: clamp(52px, 16vw, 130px); }
+  .hero {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "content content"
+      "stamp   card"
+      "footer  footer";
+    column-gap: 16px;
+    padding-top: 48px;
+    min-height: 0;
+  }
+  .hero-content { padding-left: 0; max-width: none; align-self: start; }
+  .hero-stamp { justify-self: start; align-self: center; margin: 40px 0 28px 6px; }
+  .hero-date-card { justify-self: end; align-self: center; margin: 40px 6px 28px 0; }
+  .hero-footer { padding-top: 6px; }
 }
-@media (max-width: 400px) {
-  .hero h1 { font-size: 15vw; }
+@media (max-width: 430px) {
+  .hero-date-card { width: 150px; padding: 14px 16px 13px; transform: rotate(-3deg); }
+  .hero-date-card strong { font-size: 42px; }
 }
+.hero h1 { margin-top: 14px; }
