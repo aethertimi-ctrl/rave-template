@@ -40,8 +40,6 @@ type TicketOption = {
   perks: string[];
 };
 
-const heroImage =
-  'https://images.pexels.com/photos/32399568/pexels-photo-32399568.jpeg?auto=compress&cs=tinysrgb&h=1400&w=2200';
 
 const navItems = [
   { label: 'The night', href: '#the-night' },
@@ -234,7 +232,7 @@ function App() {
       </nav>
 
       <section className="hero" id="top">
-        <div className="hero-photo" style={{ backgroundImage: `url(${heroImage})` }} role="img" aria-label="Crowd dancing at a night event" />
+        <div className="hero-photo" aria-hidden="true" />
         <div className="hero-noise" aria-hidden="true" />
         <div className="hero-content">
           <div className="hero-kicker"><span /> Jah Ent. presents <span /></div>

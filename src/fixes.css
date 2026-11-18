@@ -100,3 +100,34 @@
    could cover the footer's bottom-right corner, so leave room under it. */
 .site-footer { padding-bottom: 96px; }
 .footer-meta { border-top: 1px solid rgba(241, 238, 231, .2); color: rgba(241, 238, 231, .55); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .08em; margin: 63px 0 0; padding-top: 17px; text-transform: uppercase; }
+
+/* 11. No photos: the hero and the "Bring the whole you" band are drawn with CSS only
+   (glows, laser beams and a grid in the brand colours), so nothing can fail to load. */
+.hero-photo {
+  opacity: 1; transform: none;
+  background:
+    radial-gradient(60% 55% at 78% 18%, rgba(198, 240, 0, .28), transparent 70%),
+    radial-gradient(55% 60% at 12% 85%, rgba(217, 75, 48, .35), transparent 70%),
+    repeating-linear-gradient(115deg, transparent 0 46px, rgba(198, 240, 0, .07) 46px 48px),
+    linear-gradient(180deg, #151613, #0e0f0b);
+  animation: glow-drift 14s ease-in-out infinite alternate;
+}
+.hero-photo::after {
+  content: ''; position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(241, 238, 231, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(241, 238, 231, .05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: linear-gradient(to top, #000, transparent 75%);
+  mask-image: linear-gradient(to top, #000, transparent 75%);
+}
+.visual-break {
+  background:
+    radial-gradient(45% 80% at 85% 20%, rgba(198, 240, 0, .35), transparent 70%),
+    radial-gradient(50% 90% at 10% 100%, rgba(217, 75, 48, .5), transparent 70%),
+    repeating-linear-gradient(100deg, transparent 0 38px, rgba(241, 238, 231, .06) 38px 40px),
+    #151613;
+}
+.visual-break-overlay { background: rgba(21, 22, 19, .15); }
+@keyframes glow-drift { from { background-position: 0 0, 0 0, 0 0, 0 0; filter: hue-rotate(0deg); } to { background-position: 40px -20px, -30px 20px, 90px 0, 0 0; filter: hue-rotate(-12deg); } }
+@media (prefers-reduced-motion: reduce) { .hero-photo { animation: none; } }
