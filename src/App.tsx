@@ -177,6 +177,19 @@ function App() {
     }
   }, [theme]);
 
+  // Escape closes the mobile menu and returns focus to its button.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (event: globalThis.KeyboardEvent): void => {
+      if (event.key === 'Escape') {
+        setMenuOpen(false);
+        document.querySelector<HTMLButtonElement>('.menu-toggle')?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
+
   const scrollToSection = (href: string): void => {
     setMenuOpen(false);
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

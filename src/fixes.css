@@ -131,3 +131,30 @@
 .visual-break-overlay { background: rgba(21, 22, 19, .15); }
 @keyframes glow-drift { from { background-position: 0 0, 0 0, 0 0, 0 0; filter: hue-rotate(0deg); } to { background-position: 40px -20px, -30px 20px, 90px 0, 0 0; filter: hue-rotate(-12deg); } }
 @media (prefers-reduced-motion: reduce) { .hero-photo { animation: none; } }
+
+/* 12. Audit fixes (mobile + desktop) */
+/* Night mode: the brand name inherited the browser's dark button colour and vanished on the dark header. */
+.brand-mark, .footer-logo { color: var(--ink); }
+.footer-logo { color: var(--stage-text); }
+.brand-symbol { color: #151613; }
+
+/* Open mobile menu slid over the brand name and the night-mode button: keep them above the panel. */
+@media (max-width: 860px) {
+  .brand-mark, .theme-toggle { position: relative; z-index: 11; }
+  .nav-links { z-index: 10; }
+}
+
+/* Touch targets: at least 44px tall on phones/tablets. */
+@media (max-width: 860px) {
+  .brand-mark, .menu-toggle, .theme-toggle { min-height: 44px; }
+  .menu-toggle, .theme-toggle { min-width: 44px; }
+  .stage-tabs [role='tab'] { min-height: 44px; padding-top: 10px; padding-bottom: 10px; }
+  .text-link { min-height: 44px; }
+  .contact-card a, .site-footer a { display: inline-block; padding: 12px 0; }
+}
+
+/* Phones: the tilted date card touched the countdown. Give the hero a little more room. */
+@media (max-width: 640px) {
+  .hero { min-height: 770px; }
+  .hero-date-card { bottom: 60px; }
+}
